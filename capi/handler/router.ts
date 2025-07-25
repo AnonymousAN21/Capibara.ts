@@ -1,7 +1,7 @@
 import http, {IncomingMessage, ServerResponse} from "http";
 import https from "https";
-import { ResponseWrapper } from "../handler/response";
-import { RequestWrapper } from "../handler/request";
+import { Response } from "../handler/response";
+import { Request } from "../handler/request";
 import { error } from "console";
 //to check the url pattern
 const pattern = /^\/[a-z0-9\-\/]*$/;
@@ -17,8 +17,8 @@ const pattern = /^\/[a-z0-9\-\/]*$/;
  * @ignore
  * still on progress
  */
-type Middleware = (req: RequestWrapper, res: ResponseWrapper, next: () => void) => void;
-type Handler = (req: RequestWrapper, res: ResponseWrapper) => void
+type Middleware = (req: Request, res: Response, next: () => void) => void;
+type Handler = (req: Request, res: Response) => void
 
 class router{
     private group: {

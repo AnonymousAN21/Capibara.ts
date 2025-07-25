@@ -1,7 +1,7 @@
 import http, {IncomingMessage, ServerResponse} from "http";
 import https from "https";
-import { ResponseWrapper } from "../handler/response";
-import { RequestWrapper } from "../handler/request";
+import { Response } from "../handler/response";
+import { Request } from "../handler/request";
 import { error } from "console";
 //to check the url pattern
 const pattern = /^\/[a-z0-9\-\/]*$/;
@@ -19,8 +19,8 @@ interface RequestWithContext extends IncomingMessage {
  * define the Middleware and Handler Type
  * @private
 */  
-type Middleware = (req: RequestWrapper, res: ResponseWrapper, next: () => void) => void;
-type Handler = (req: RequestWrapper, res: ResponseWrapper) => void
+export type Middleware = (req: Request, res: Response, next: () => void) => void;
+export type Handler = (req: Request, res: Response) => void | Promise<void>;
 
 //main class
 class _func {
@@ -32,19 +32,16 @@ class _func {
         handler: Handler;
     }[] = [];
 
-    constructor(){}
+     //start the apps
 
-    /**
-     * start the apps
-     */
     async start(port: number, text: string | '') {
         const server = http.createServer(async (req, res) => {
             const method = req.method?.toUpperCase() || '';
             const url = req.url || '';
 
             //wrap the old res using my own response to make it simpler
-            const customRes = new ResponseWrapper(res);
-            const customReq = new RequestWrapper(req);
+            const customRes = new Response(res);
+            const customReq = new Request(req);
             await customReq.parseBody(); 
 
             const route = this.routes.find(r => r.method === method && r.endpoint === url);
@@ -89,32 +86,31 @@ class _func {
         }
     }
 
-    async post(endpoint: string, ...handlers: [...Middleware[], Handler]){
-        if(!pattern.test(endpoint)){
-            throw new SyntaxError("Invalid Endpoint")
+    private register(method: string, endpoint: string, handlers: [...Middleware[], Handler]) {
+        if (!pattern.test(endpoint)) {
+            throw new SyntaxError("Invalid Endpoint");
         }
+
         const middlewares = handlers.slice(0, -1) as Middleware[];
         const handler = handlers[handlers.length - 1] as Handler;
-        this.routes.push({
-            method: "POST",
-            endpoint,
-            middlewares,
-            handler,
-        })
+
+        this.routes.push({ method, endpoint, middlewares, handler });
+    }
+
+    async post(endpoint: string, ...handlers: [...Middleware[], Handler]){
+        this.register("POST", endpoint, handlers);
     }
 
     async get(endpoint: string, ...handlers: [...Middleware[], Handler]){
-        if(!pattern.test(endpoint)){
-            throw new SyntaxError("Invalid Endpoint")
-        }
-        const middlewares  = handlers.slice(0, -1) as Middleware[];
-        const handler = handlers[handlers.length - 1] as Handler;
-        this.routes.push({
-            method: "GET",
-            endpoint,
-            middlewares,
-            handler
-        })
+        this.register("GET", endpoint, handlers);
+    }
+
+    async put(endpoint: string, ...handlers: [...Middleware[], Handler]){
+        this.register("PUT", endpoint, handlers);
+    }
+
+    async delete(endpoint: string, ...handlers: [...Middleware[], Handler]){
+        this.register("DELETE", endpoint, handlers);
     }
 }
 

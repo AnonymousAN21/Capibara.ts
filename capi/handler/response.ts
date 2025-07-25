@@ -1,6 +1,6 @@
 import { ServerResponse } from "http";
 
-export class ResponseWrapper {
+export class Response {
     private res: ServerResponse;
     private code?: number;
 

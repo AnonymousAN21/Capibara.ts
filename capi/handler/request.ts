@@ -2,7 +2,7 @@ import { IncomingMessage } from "http";
 import { parse as parseUrl } from "url";
 import { parse as parseQuery } from "querystring";
 
-export class RequestWrapper {
+export class Request {
     private req: IncomingMessage;
 
     public params: Record<string, string> = {};

@@ -4,7 +4,10 @@
     "module": "CommonJS",
     "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "../Capibara.ts",
-    "strict": true
-  }
+    "rootDir": "./",
+    "strict": true,
+    "declaration": true
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["dist", "node_modules"]
 }
