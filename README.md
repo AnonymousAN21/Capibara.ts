@@ -218,7 +218,7 @@ npx tsc && node dist/index.js
 
 ## 📄 License
 
-MIT © [Andrew Tangel](https://github.com/andrewtangel)
+MIT © [Andrew Tangel](https://instagram.com/ndree_tngl)
 
 This framework was built to explore native HTTP design patterns with middleware, validation, and wrapper control — a minimalist alternative to larger frameworks like Express.
 
