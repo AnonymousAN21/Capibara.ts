@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+.env
+dist/
+build/
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Linux
+*.swp
+
+# VSCode
+.vscode/
