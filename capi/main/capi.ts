@@ -3,6 +3,8 @@ import https from "https";
 import { Response } from "../handler/response";
 import { Request } from "../handler/request";
 import { error } from "console";
+import { Router } from "../handler/router";
+
 //to check the url pattern
 const pattern = /^\/[a-z0-9\-\/]*$/;
 
@@ -32,13 +34,12 @@ class _func {
         handler: Handler;
     }[] = [];
 
+    private globalMiddlewares: Middleware[] = [];
      //start the apps
-
     async start(port: number, text: string | '') {
         const server = http.createServer(async (req, res) => {
             const method = req.method?.toUpperCase() || '';
             const url = req.url || '';
-
             //wrap the old res using my own response to make it simpler
             const customRes = new Response(res);
             const customReq = new Request(req);
@@ -49,17 +50,19 @@ class _func {
             if(!route){
                 return customRes.status(404).json({ error: "routes not found", url: url, method: method});
             }
+            const combinedMiddlewares = [...this.globalMiddlewares, ...route.middlewares];
+            const handler = route.handler;
 
-            const { middlewares, handler } = route;
             let index = -1;
             const next = () => {
                 index++;
-                if (index < middlewares.length) {
-                    middlewares[index](customReq, customRes, next);
+                if (index < combinedMiddlewares.length) {
+                    combinedMiddlewares[index](customReq, customRes, next);
                 } else {
                     handler(customReq, customRes);
                 }
             };
+
 
             next();
         });
@@ -72,16 +75,20 @@ class _func {
     /**
      * use function
      * @param middleware callback with next to continue to next function
+     *
      */
-    async use(...middleware: [...Middleware[]]){
-        //to get all existing middleware data in routes data
-        for (const route of this.routes) {
-            //to get all existing middleware that user want to include before or after the existingg middleware
-            for (const mw of middleware) {
-                //check if the middleware already exist to make sure doenst duplicate
-                if (!route.middlewares.includes(mw)) {
-                    route.middlewares.push(mw);
-                }
+    /**
+     * Register global middleware for every request.
+     */
+    use(pathOrMiddleware: string | Middleware, maybeRouter?: Router) {
+        if (typeof pathOrMiddleware === "string" && maybeRouter instanceof Router) {
+            const routes = maybeRouter.getRoutes();
+            for (const route of routes) {
+                this["register"](route.method, route.endpoint, [...route.middlewares, route.handler]);
+            }
+        } else if (typeof pathOrMiddleware === "function") {
+            if (!this.globalMiddlewares.includes(pathOrMiddleware)) {
+                this.globalMiddlewares.push(pathOrMiddleware);
             }
         }
     }
@@ -97,18 +104,39 @@ class _func {
         this.routes.push({ method, endpoint, middlewares, handler });
     }
 
+    /**
+     * using next chaining function
+     * @method POST
+     * @param endpoint url endpoint 
+     * @param handlers POST middleware and callback
+     */
     async post(endpoint: string, ...handlers: [...Middleware[], Handler]){
         this.register("POST", endpoint, handlers);
     }
-
+    /**
+     * using next chaining function
+     * @method GET
+     * @param endpoint url endpoint 
+     * @param handlers GET middleware and callback
+     */
     async get(endpoint: string, ...handlers: [...Middleware[], Handler]){
         this.register("GET", endpoint, handlers);
     }
-
+    /**
+     * using next chaining function
+     * @method PUT
+     * @param endpoint url endpoint 
+     * @param handlers PUT middleware and callback
+     */
     async put(endpoint: string, ...handlers: [...Middleware[], Handler]){
         this.register("PUT", endpoint, handlers);
     }
-
+    /**
+     * using next chaining function
+     * @method DELETE
+     * @param endpoint url endpoint 
+     * @param handlers middleware and callback
+     */
     async delete(endpoint: string, ...handlers: [...Middleware[], Handler]){
         this.register("DELETE", endpoint, handlers);
     }
