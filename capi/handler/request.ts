@@ -4,13 +4,13 @@ import { parse as parseQuery } from "querystring";
 
 export class Request {
     private req: IncomingMessage;
-
     public params: Record<string, string> = {};
     public query: Record<string, string | string[] | undefined> = {};
     public headers: Record<string, string | string[] | undefined> = {};
     public method: string;
     public url: string;
-    public body: any; // <- parsed body goes here
+    public body: any; 
+    public ctx: Record<string, Record<string, any>> = {} // to pass data from one function to other 
 
     constructor(req: IncomingMessage) {
         this.req = req;
@@ -19,10 +19,8 @@ export class Request {
         this.headers = req.headers;
 
         // parse query string
-        const parsed = parseUrl(this.url);
-        if (parsed.query) {
-            this.query = parseQuery(parsed.query);
-        }
+        const parsed = new URL(this.url, `http://${req.headers.host}`);
+        this.query = Object.fromEntries(parsed.searchParams.entries());
     }
 
     /** Parses the request body once, stores it in `this.body` */
