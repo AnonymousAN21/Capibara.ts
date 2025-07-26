@@ -3,8 +3,8 @@
 
 # 🦫 Capibara.ts – Lightweight HTTP Framework for Node.js
 
-[![npm version](https://img.shields.io/npm/v/capibara.ts?color=blue\&style=flat-square)](https://www.npmjs.com/package/capibara.ts)
-[![license](https://img.shields.io/npm/l/capibara.ts?color=brightgreen\&style=flat-square)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/capibara.ts?color=blue&style=flat-square)](https://www.npmjs.com/package/capibara.ts)
+[![license](https://img.shields.io/npm/l/capibara.ts?color=brightgreen&style=flat-square)](./LICENSE)
 [![typescript](https://img.shields.io/badge/built%20with-typescript-blue?style=flat-square)](https://www.typescriptlang.org/)
 
 > Minimalist web framework with middleware support, input validation, and native `http` handling — inspired by Express, built from scratch in TypeScript.
@@ -13,14 +13,15 @@
 
 ## 🚀 Features
 
-* ✅ **HTTP server & custom routing**
-* 🧩 **Middleware chaining** with `next()`
-* 🧾 **Body parser**: JSON & URL-encoded
-* 🧪 `res.testStart()` and `res.testEnd()` for request speed tracking
-* 🔍 `capyScrub()` – built-in input validator
-* 🛠 **Request/Response wrappers**
-* 🦺 **Zero dependencies**, native-only
-* 📦 **Written in TypeScript** with full typings
+* ✅ **Native HTTP server & lightweight router**
+* 🔁 **Middleware chaining** via `next()`
+* 🔒 **Input validation** with `capyScrub()`
+* 🧾 **Built-in body parser** for JSON & URL-encoded
+* ⏱ `res.testStart()` / `res.testEnd()` to track response duration
+* 📦 **Request/Response wrappers** for cleaner API
+* 🦺 **Zero dependencies**, fully native
+* 🧠 **Written in TypeScript** with full typings
+* 🧩 Supports **modular routers** like `Router("/prefix")`
 
 ---
 
@@ -28,9 +29,9 @@
 
 ```bash
 npm install capibara.ts
-```
+````
 
-Or clone from GitHub:
+Or clone manually:
 
 ```bash
 git clone https://github.com/your-username/capibara.ts.git
@@ -40,7 +41,7 @@ npm install
 
 ---
 
-## 🛠 Quick Usage
+## 🛠 Quick Start
 
 ```ts
 import capi from "capibara.ts";
@@ -54,7 +55,7 @@ capi.start(3000, "🔥 Server running at http://localhost:3000");
 
 ---
 
-## 🔧 Middleware Example
+## 🔧 Global Middleware
 
 ```ts
 capi.use((req, res, next) => {
@@ -65,7 +66,7 @@ capi.use((req, res, next) => {
 
 ---
 
-## 🧽 Input Validation with `capyScrub()`
+## 🧪 Input Validation with `capyScrub()`
 
 ```ts
 import { capyScrub } from "capibara.ts";
@@ -94,55 +95,34 @@ capi.get("/track", (req, res) => {
   res.testStart();
 
   setTimeout(() => {
-    res.status(200).testEnd("Done in delay!");
+    res.status(200).testEnd("Delayed response complete!");
   }, 150);
 });
 ```
 
 ---
 
-## 📚 API Reference
+## 🧩 Grouping Routes with `Router`
 
-### capi.get(path, ...handlers)
+```ts
+import { Router } from "capibara.ts";
 
-Register a `GET` route.
+const userRouter = new Router("/user");
 
-### capi.post(path, ...handlers)
+userRouter.get("/profile", (req, res) => {
+  res.json({ user: "me" });
+});
 
-Register a `POST` route.
+userRouter.post("/login", (req, res) => {
+  res.json({ msg: "logged in" });
+});
 
-### capi.use(...middlewares)
-
-Attach global middleware.
-
----
-
-## 🔧 `Request` Wrapper (`req`)
-
-| Property      | Description                     |
-| ------------- | ------------------------------- |
-| `req.body`    | Parsed JSON or URL-encoded body |
-| `req.query`   | Parsed query string             |
-| `req.params`  | (reserved for future routing)   |
-| `req.headers` | Normalized headers              |
-| `req.method`  | HTTP method                     |
-| `req.url`     | Raw URL                         |
+capi.use("/user", userRouter);
+```
 
 ---
 
-## 🔧 `Response` Wrapper (`res`)
-
-| Method              | Description                       |
-| ------------------- | --------------------------------- |
-| `res.status(code)`  | Set HTTP status                   |
-| `res.json(data)`    | Send JSON response                |
-| `res.text(str)`     | Send plain text response          |
-| `res.testStart()`   | Start duration timer              |
-| `res.testEnd(data)` | End timer and respond with timing |
-
----
-
-## 🧽 `capyScrub` Input Types
+## 🧽 capyScrub Input Types
 
 | Type        | Validates...           |
 | ----------- | ---------------------- |
@@ -155,9 +135,36 @@ Attach global middleware.
 
 ---
 
-## ✅ Example
+## 🧾 Request Wrapper (`req`)
+
+| Property      | Description                   |
+| ------------- | ----------------------------- |
+| `req.body`    | Parsed JSON or form body      |
+| `req.query`   | Parsed query string           |
+| `req.ctx`     | Context object for middleware |
+| `req.headers` | Request headers               |
+| `req.method`  | HTTP method                   |
+| `req.url`     | Raw URL                       |
+
+---
+
+## 📤 Response Wrapper (`res`)
+
+| Method              | Description            |
+| ------------------- | ---------------------- |
+| `res.status(code)`  | Set HTTP status code   |
+| `res.json(data)`    | Send JSON response     |
+| `res.text(str)`     | Send plain text        |
+| `res.testStart()`   | Start timing benchmark |
+| `res.testEnd(data)` | End timing and respond |
+
+---
+
+## ✅ Example: Full Route
 
 ```ts
+import { capi, capyScrub } from "capibara.ts";
+
 capi.post(
   "/register",
   capyScrub({
@@ -174,44 +181,72 @@ capi.post(
 
 ---
 
-## ❗ Route Rules
+## ⚠️ Route Format Rules
 
-All routes must match:
+All routes must match this format:
 
 ```regex
 ^\/[a-z0-9\-\/]*$
 ```
 
-This prevents malformed or unsafe routes.
-
----
-
-## 📂 Folder Structure (after build)
-
-```
-capibara.ts/
-├── capi/
-│   ├── main/           # core engine
-│   ├── handler/        # request & response wrappers
-│   └── middleware/     # sanitizers
-├── dist/               # output after tsc build
-├── index.ts            # entry point
-├── package.json
-└── README.md
-```
+This keeps route paths clean and safe from malformed input.
 
 ---
 
 ## 🧪 Local Dev & Testing
 
-Use `ts-node` or native build:
+Start the server with:
 
 ```bash
-# Start dev with ts-node
+# Development
 npx ts-node index.ts
 
-# OR build to JS then run
+# Or build and run
 npx tsc && node dist/index.js
+```
+
+---
+
+## 🔐 Error Handling
+
+To send custom error response:
+
+```ts
+capi.use((req, res, next) => {
+  try {
+    next();
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+```
+
+> You can also wrap route handlers manually with try/catch if needed.
+
+---
+
+## 🧠 Typing Helpers
+
+If you're getting type errors like:
+
+```ts
+'_req' implicitly has 'any' type
+```
+
+You can create a helper:
+
+```ts
+import type { Handler } from "capibara.ts";
+
+export const defineHandler = (fn: Handler): Handler => fn;
+```
+
+Then use:
+
+```ts
+route.post("/login", defineHandler((_req, res) => {
+  res.status(200).json({ msg: "login" });
+}));
 ```
 
 ---
@@ -220,8 +255,10 @@ npx tsc && node dist/index.js
 
 MIT © [Andrew Tangel](https://instagram.com/ndree_tngl)
 
-This framework was built to explore native HTTP design patterns with middleware, validation, and wrapper control — a minimalist alternative to larger frameworks like Express.
+> Capibara.ts was created to explore low-level HTTP handling with modern TypeScript. It's a minimalist yet powerful alternative to larger frameworks.
 
 ---
 
+```
 
+---
