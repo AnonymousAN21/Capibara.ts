@@ -257,8 +257,7 @@ Capibara.ts includes flexible CORS middleware support using `capi.use(cors())`. 
 ### 🔧 Setup Example
 
 ```ts
-import { capi } from "capibara.ts";
-import { cors } from "./middleware/cors"; // assuming your cors middleware file
+import { capi, cors } from "capibara.ts";
 
 capi.use(cors({
   origin: ["http://localhost:5173", "https://myapp.com"],
