@@ -248,6 +248,65 @@ route.post("/login", defineHandler((_req, res) => {
   res.status(200).json({ msg: "login" });
 }));
 ```
+---
+
+## 🌐 Enable CORS Middleware
+
+Capibara.ts includes flexible CORS middleware support using `capi.use(cors())`. You can configure allowed origins, methods, headers, and credentials.
+
+### 🔧 Setup Example
+
+```ts
+import { capi } from "capibara.ts";
+import { cors } from "./middleware/cors"; // assuming your cors middleware file
+
+capi.use(cors({
+  origin: ["http://localhost:5173", "https://myapp.com"],
+  methods: "GET, POST, PUT, DELETE",
+  headers: "Content-Type, Authorization",
+  credentials: true
+}));
+```
+
+> 🔒 This ensures your API only accepts requests from trusted origins and supports preflight handling automatically.
+
+---
+
+### 🔁 CORS Middleware Features
+
+| Option        | Description                                            |
+| ------------- | ------------------------------------------------------ |
+| `origin`      | List of allowed origins (e.g., `["*"]`, or specific)   |
+| `methods`     | Allowed HTTP methods (e.g., `"GET, POST"`)             |
+| `headers`     | Allowed request headers                                |
+| `credentials` | Support cookies/auth headers (must not use `*` origin) |
+| `silent`      | Suppress console logs for blocked origins              |
+
+---
+
+### 🚫 Preflight Example
+
+Capibara handles `OPTIONS` requests automatically with this middleware:
+
+```http
+OPTIONS /user/login HTTP/1.1
+Origin: http://localhost:5173
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: Content-Type, Authorization
+```
+
+Your server will respond with:
+
+```http
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: http://localhost:5173
+Access-Control-Allow-Methods: POST
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Credentials: true
+```
+
+---
+
 
 ---
 
