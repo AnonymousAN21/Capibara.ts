@@ -14,6 +14,14 @@ export class Response {
     constructor(res: ServerResponse) {
         this.res = res;
     }
+
+    end(data?: string) {
+        this.res.end(data);
+    }
+
+    setHeader(key: string, value: string) {
+        this.res.setHeader(key, value);
+    }
     /**
      * to return value as json
      * @param code to set the status code 
