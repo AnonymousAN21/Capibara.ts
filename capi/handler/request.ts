@@ -22,7 +22,11 @@ export class Request {
         const parsed = new URL(this.url, `http://${req.headers.host}`);
         this.query = Object.fromEntries(parsed.searchParams.entries());
     }
-
+    
+    /** New: access raw socket IP */
+    get ip(): string {
+        return this.req.socket.remoteAddress || "unknown";
+    }
     /** Parses the request body once, stores it in `this.body` */
     async parseBody(): Promise<void> {
         const chunks: Uint8Array[] = [];
