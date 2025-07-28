@@ -307,6 +307,87 @@ Access-Control-Allow-Credentials: true
 ---
 
 
+## 🧪 New: Verbose Request Logging
+
+Capibara now includes **built-in logging** that tracks:
+
+* HTTP method and path
+* Local timestamp (`HH:mm - YYYY/MM/DD`)
+* IP address (`::1` or client IP)
+* Response duration in milliseconds
+* CORS status (✅ Allowed / ❌ Blocked)
+
+Example:
+
+```bash
+POST: /user/register | 01:39 - 2025/07/29 | ::1 | 0.38ms ✅
+GET: /user | 01:33 - 2025/07/29 | ::1 | 3.97ms ❌
+```
+
+---
+
+## 🧩 Dynamic Route Parameters
+
+Capibara now supports **dynamic segments** with parameter parsing:
+
+```ts
+capi.get("/user/:id", (req, res) => {
+  const userId = req.params.id;
+  const query = req.query; // e.g., ?a=1
+  res.json({ id: userId, query });
+});
+```
+
+This allows URLs like:
+
+```http
+GET /user/123?a=1&b=ok
+```
+
+Parsed as:
+
+```json
+{
+  "id": "123",
+  "query": {
+    "a": "1",
+    "b": "ok"
+  }
+}
+```
+
+> Dynamic segments use the `:` prefix and are accessible via `req.params`.
+
+---
+
+### 🛠 Example: Dynamic GET route
+
+```ts
+capi.get("/product/:productId", (req, res) => {
+  res.json({
+    product: req.params.productId,
+    options: req.query
+  });
+});
+```
+
+---
+
+## 🧠 Pro Tip: Middleware Logging
+
+You can use `req.ctx` to track custom metadata across middlewares, for example:
+
+```ts
+capi.use((req, res, next) => {
+  req.ctx.start = Date.now();
+  next();
+});
+```
+
+---
+
+These new features add traceability and flexibility — and bring Capibara.ts closer to production-readiness.
+
 ---
 
 ## 📄 License
